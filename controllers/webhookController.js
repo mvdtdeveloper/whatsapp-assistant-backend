@@ -2,6 +2,7 @@ const { handleIncomingMessage } = require("../services/conversationEngine");
 
 // GET /webhook  -> Meta calls this once to verify your endpoint
 function verifyWebhook(req, res) {
+  console.log("run...........webhook");
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
