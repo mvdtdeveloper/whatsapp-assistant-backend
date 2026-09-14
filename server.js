@@ -32,29 +32,65 @@ app.get("/", (req, res) => {
 // WEBHOOK VERIFY
 // ===============================
 
-app.get("/webhook", (req, res) => {
-  console.log("========== META WEBHOOK VERIFY ==========");
+// app.get("/webhook", (req, res) => {
 
-  console.log("req.query:", req.query);
+//   console.log("req.query:", req.query);
+
+//   const mode = req.query["hub.mode"];
+
+//   console.log("mode", mode)
+//   const verifyToken = req.query["hub.verify_token"];
+//   const challenge = req.query["hub.challenge"];
+
+//   console.log("mode:", mode);
+//   console.log("verifyToken:", verifyToken);
+//   console.log("challenge:", challenge);
+
+//   const MY_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+
+//   if (mode === "subscribe" && verifyToken === MY_VERIFY_TOKEN) {
+//     console.log("✅ WEBHOOK VERIFIED");
+
+//     // IMPORTANT
+//     return res.status(200).send(String(challenge));
+//   }
+
+//   console.log("❌ WEBHOOK VERIFICATION FAILED");
+
+//   return res.sendStatus(403);
+// });
+
+router.get("/webhook", (req, res) => {
+  console.log("\n\n====================================");
+  console.log("🔥🔥 META GET WEBHOOK HIT 🔥🔥");
+  console.log("TIME:", new Date().toISOString());
+
+  console.log("METHOD:", req.method);
+  console.log("ORIGINAL URL:", req.originalUrl);
+
+  console.log("REQ QUERY:");
+  console.log(JSON.stringify(req.query, null, 2));
 
   const mode = req.query["hub.mode"];
-  const verifyToken = req.query["hub.verify_token"];
+  const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  console.log("mode:", mode);
-  console.log("verifyToken:", verifyToken);
-  console.log("challenge:", challenge);
+  console.log("MODE =", mode);
+  console.log("TOKEN =", token);
+  console.log("CHALLENGE =", challenge);
 
-  const MY_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+  console.log("====================================\n\n");
 
-  if (mode === "subscribe" && verifyToken === MY_VERIFY_TOKEN) {
-    console.log("✅ WEBHOOK VERIFIED");
+  if (
+    mode === "subscribe" &&
+    token === process.env.WHATSAPP_VERIFY_TOKEN
+  ) {
+    console.log("✅ META WEBHOOK VERIFIED");
 
-    // IMPORTANT
-    return res.status(200).send(String(challenge));
+    return res.status(200).send(challenge);
   }
 
-  console.log("❌ WEBHOOK VERIFICATION FAILED");
+  console.log("❌ META WEBHOOK VERIFY FAILED");
 
   return res.sendStatus(403);
 });
