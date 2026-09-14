@@ -100,106 +100,106 @@ app.get("/webhook", (req, res) => {
 // Run this once after webhook configuration
 // =====================================================
 
-async function subscribeAppToWABA() {
-  try {
-    if (!WABA_ID) {
-      throw new Error(
-        "WHATSAPP_BUSINESS_ACCOUNT_ID is missing"
-      );
-    }
+// async function subscribeAppToWABA() {
+//   try {
+//     if (!WABA_ID) {
+//       throw new Error(
+//         "WHATSAPP_BUSINESS_ACCOUNT_ID is missing"
+//       );
+//     }
 
-    if (!ACCESS_TOKEN) {
-      throw new Error(
-        "WHATSAPP_ACCESS_TOKEN is missing"
-      );
-    }
+//     if (!ACCESS_TOKEN) {
+//       throw new Error(
+//         "WHATSAPP_ACCESS_TOKEN is missing"
+//       );
+//     }
 
-    const url =
-      `https://graph.facebook.com/${GRAPH_API_VERSION}` +
-      `/${WABA_ID}/subscribed_apps`;
+//     const url =
+//       `https://graph.facebook.com/${GRAPH_API_VERSION}` +
+//       `/${WABA_ID}/subscribed_apps`;
 
-    console.log("====================================");
-    console.log("🔔 SUBSCRIBING APP TO WABA");
-    console.log("WABA ID:", WABA_ID);
-    console.log("====================================");
+//     console.log("====================================");
+//     console.log("🔔 SUBSCRIBING APP TO WABA");
+//     console.log("WABA ID:", WABA_ID);
+//     console.log("====================================");
 
-    const response = await fetch(url, {
-      method: "POST",
+//     const response = await fetch(url, {
+//       method: "POST",
 
-      headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-    });
+//       headers: {
+//         Authorization: `Bearer ${ACCESS_TOKEN}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
 
-    const data = await response.json();
+//     const data = await response.json();
 
-    console.log(
-      "WABA SUBSCRIBE RESPONSE:",
-      JSON.stringify(data, null, 2)
-    );
+//     console.log(
+//       "WABA SUBSCRIBE RESPONSE:",
+//       JSON.stringify(data, null, 2)
+//     );
 
-    if (!response.ok) {
-      throw new Error(
-        data?.error?.message ||
-          "WABA subscription failed"
-      );
-    }
+//     if (!response.ok) {
+//       throw new Error(
+//         data?.error?.message ||
+//           "WABA subscription failed"
+//       );
+//     }
 
-    console.log("✅ WABA SUBSCRIBED SUCCESSFULLY");
+//     console.log("✅ WABA SUBSCRIBED SUCCESSFULLY");
 
-    return data;
+//     return data;
 
-  } catch (error) {
-    console.error(
-      "❌ WABA SUBSCRIPTION ERROR:",
-      error.message
-    );
+//   } catch (error) {
+//     console.error(
+//       "❌ WABA SUBSCRIPTION ERROR:",
+//       error.message
+//     );
 
-    throw error;
-  }
-}
+//     throw error;
+//   }
+// }
 
 
 // =====================================================
 // 3. CHECK WABA SUBSCRIPTION
 // =====================================================
 
-async function getWabaSubscriptions() {
-  try {
-    const url =
-      `https://graph.facebook.com/${GRAPH_API_VERSION}` +
-      `/${WABA_ID}/subscribed_apps`;
+// async function getWabaSubscriptions() {
+//   try {
+//     const url =
+//       `https://graph.facebook.com/${GRAPH_API_VERSION}` +
+//       `/${WABA_ID}/subscribed_apps`;
 
-    const response = await fetch(url, {
-      method: "GET",
+//     const response = await fetch(url, {
+//       method: "GET",
 
-      headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
-      },
-    });
+//       headers: {
+//         Authorization: `Bearer ${ACCESS_TOKEN}`,
+//       },
+//     });
 
-    const data = await response.json();
+//     const data = await response.json();
 
-    console.log(
-      "WABA SUBSCRIPTIONS:",
-      JSON.stringify(data, null, 2)
-    );
+//     console.log(
+//       "WABA SUBSCRIPTIONS:",
+//       JSON.stringify(data, null, 2)
+//     );
 
-    return {
-      ok: response.ok,
-      data,
-    };
+//     return {
+//       ok: response.ok,
+//       data,
+//     };
 
-  } catch (error) {
-    console.error(
-      "❌ GET WABA SUBSCRIPTION ERROR:",
-      error
-    );
+//   } catch (error) {
+//     console.error(
+//       "❌ GET WABA SUBSCRIPTION ERROR:",
+//       error
+//     );
 
-    throw error;
-  }
-}
+//     throw error;
+//   }
+// }
 
 
 // =====================================================
@@ -207,41 +207,41 @@ async function getWabaSubscriptions() {
 // Remove/protect these after setup
 // =====================================================
 
-app.get("/setup/waba-status", async (req, res) => {
-  try {
-    const result =
-      await getWabaSubscriptions();
+// app.get("/setup/waba-status", async (req, res) => {
+//   try {
+//     const result =
+//       await getWabaSubscriptions();
 
-    return res
-      .status(result.ok ? 200 : 400)
-      .json(result.data);
+//     return res
+//       .status(result.ok ? 200 : 400)
+//       .json(result.data);
 
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       error: error.message,
+//     });
+//   }
+// });
 
 
-app.post("/setup/subscribe-waba", async (req, res) => {
-  try {
-    const data =
-      await subscribeAppToWABA();
+// app.post("/setup/subscribe-waba", async (req, res) => {
+//   try {
+//     const data =
+//       await subscribeAppToWABA();
 
-    return res.status(200).json({
-      success: true,
-      meta: data,
-    });
+//     return res.status(200).json({
+//       success: true,
+//       meta: data,
+//     });
 
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
-});
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       error: error.message,
+//     });
+//   }
+// });
 
 
 // =====================================================
@@ -589,7 +589,7 @@ async function processWhatsAppWebhook(body) {
             senderPhone,
             `Currently I can process text messages only.
 
-Please type "Hi" to start.`
+              Please type "Hi" to start.`
           );
         }
       }
