@@ -120,6 +120,8 @@ app.get("/webhook", (req, res) => {
 
 async function sendWhatsAppMessage(to, message) {
   console.log(process.env.WHATSAPP_PHONE_NUMBER_ID);
+  console.log(process.env.WHATSAPP_TOKEN);
+  
   try {
     const url =
       `https://graph.facebook.com/v24.0/` +
@@ -145,8 +147,10 @@ async function sendWhatsAppMessage(to, message) {
         },
       }),
     });
+    console.log("respons.....", response)
 
     const data = await response.json();
+    console.log("data", data)
 
     console.log("WhatsApp API response:", data);
 
