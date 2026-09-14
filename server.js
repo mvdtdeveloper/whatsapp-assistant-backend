@@ -10,7 +10,7 @@ const cors = require("cors");
 
 const app = express();
 
-connectDB();
+// connectDB();
 
 app.use(
   cors({
