@@ -119,26 +119,33 @@ app.get("/webhook", (req, res) => {
 // ================================
 
 async function sendWhatsAppMessage(to, message) {
-  console.log(process.env.WHATSAPP_PHONE_NUMBER_ID);
-  console.log(process.env.WHATSAPP_TOKEN);
-  
   try {
+    const phoneNumberId =
+      process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+    const token =
+      process.env.WHATSAPP_TOKEN;
+
     const url =
-      `https://graph.facebook.com/v24.0/` +
-      `${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
+      `https://graph.facebook.com/v24.0/${phoneNumberId}/messages`;
+
+    console.log("📤 Sending WhatsApp message...");
+    console.log("TO:", to);
 
     const response = await fetch(url, {
       method: "POST",
 
       headers: {
-        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
 
       body: JSON.stringify({
         messaging_product: "whatsapp",
+
         recipient_type: "individual",
-        to,
+
+        to: to,
 
         type: "text",
 
@@ -147,19 +154,33 @@ async function sendWhatsAppMessage(to, message) {
         },
       }),
     });
-    console.log("respons.....", response)
 
     const data = await response.json();
-    console.log("data", data)
 
-    console.log("WhatsApp API response:", data);
+    console.log(
+      "META RESPONSE:",
+      JSON.stringify(data, null, 2)
+    );
 
-    return data;
+    if (!response.ok) {
+      console.error(
+        "❌ MESSAGE SEND FAILED"
+      );
+
+      return;
+    }
+
+    console.log(
+      "✅ MESSAGE SENT SUCCESSFULLY"
+    );
+
   } catch (error) {
-    console.error("Send WhatsApp error:", error);
+    console.error(
+      "❌ SEND MESSAGE ERROR:",
+      error
+    );
   }
 }
-
 // ================================
 // RECEIVE WHATSAPP MESSAGE
 // ================================
