@@ -96,7 +96,7 @@ async function sendWhatsAppMessage(to, message) {
 // RECEIVE WHATSAPP MESSAGE
 // ================================
 
-app.post("/api/whatsapp/webhook", async (req, res) => {
+app.post("/webhook", async (req, res) => {
   try {
 
     // Always acknowledge webhook
