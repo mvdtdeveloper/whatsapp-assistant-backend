@@ -2,138 +2,280 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-// const connectDB = require("./config/db");
-
-// const userRoutes = require("./routes/userRoutes");
-// const questionRoutes = require("./routes/questionRoutes");
-// const conversationRoutes = require("./routes/conversationRoutes");
 
 const app = express();
 
-// connectDB();
+// =====================================================
+// CONFIG
+// =====================================================
+
+const PORT = process.env.PORT || 5000;
+
+const GRAPH_API_VERSION =
+  process.env.GRAPH_API_VERSION || "v24.0";
+
+const VERIFY_TOKEN =
+  process.env.WHATSAPP_VERIFY_TOKEN;
+
+const ACCESS_TOKEN =
+  process.env.WHATSAPP_ACCESS_TOKEN;
+
+const PHONE_NUMBER_ID =
+  process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+const WABA_ID =
+  process.env.WHATSAPP_BUSINESS_ACCOUNT_ID;
+
+
+// =====================================================
+// MIDDLEWARE
+// =====================================================
 
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "*",
-  }),
+  })
 );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("WhatsApp  with webhooks Assistant API is running ✅");
+
+// Optional request logger
+app.use((req, res, next) => {
+  console.log(
+    `\n[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`
+  );
+
+  next();
 });
 
-// app.use("/api/users", userRoutes);
-// app.use("/api/questions", questionRoutes);
-// app.use("/api/conversations", conversationRoutes);
 
-// ================================
-// WEBHOOK VERIFY
-// ===============================
+// =====================================================
+// HOME
+// =====================================================
 
-// app.get("/webhook", (req, res) => {
+app.get("/", (req, res) => {
+  res.send("MVDT WhatsApp Assistant API is running ✅");
+});
 
-//   console.log("req.query:", req.query);
 
-//   const mode = req.query["hub.mode"];
-
-//   console.log("mode", mode)
-//   const verifyToken = req.query["hub.verify_token"];
-//   const challenge = req.query["hub.challenge"];
-
-//   console.log("mode:", mode);
-//   console.log("verifyToken:", verifyToken);
-//   console.log("challenge:", challenge);
-
-//   const MY_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
-
-//   if (mode === "subscribe" && verifyToken === MY_VERIFY_TOKEN) {
-//     console.log("✅ WEBHOOK VERIFIED");
-
-//     // IMPORTANT
-//     return res.status(200).send(String(challenge));
-//   }
-
-//   console.log("❌ WEBHOOK VERIFICATION FAILED");
-
-//   return res.sendStatus(403);
-// });
+// =====================================================
+// 1. WEBHOOK VERIFICATION
+// Meta calls this using GET
+// =====================================================
 
 app.get("/webhook", (req, res) => {
-  console.log("\n\n====================================");
-  console.log("🔥🔥 META GET WEBHOOK HIT 🔥🔥");
-  console.log("TIME:", new Date().toISOString());
-
-  console.log("METHOD:", req.method);
-  console.log("ORIGINAL URL:", req.originalUrl);
-
-  console.log("REQ QUERY:");
-  console.log(JSON.stringify(req.query, null, 2));
+  console.log("====================================");
+  console.log("🔥 META GET WEBHOOK HIT");
+  console.log("QUERY:", req.query);
 
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  console.log("MODE =", mode);
-  console.log("TOKEN =", token);
-  console.log("CHALLENGE =", challenge);
+  console.log("MODE:", mode);
+  console.log("VERIFY TOKEN:", token);
+  console.log("CHALLENGE:", challenge);
 
-  console.log("====================================\n\n");
-
-  if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+  if (
+    mode === "subscribe" &&
+    token === VERIFY_TOKEN
+  ) {
     console.log("✅ META WEBHOOK VERIFIED");
 
-    return res.status(200).send(challenge);
+    return res
+      .status(200)
+      .send(String(challenge));
   }
 
-  console.log("❌ META WEBHOOK VERIFY FAILED");
+  console.log("❌ WEBHOOK VERIFICATION FAILED");
 
   return res.sendStatus(403);
 });
 
-//  WORKING ***********
-// +++++++++++++++++++++++++
-// app.post("/webhook", (req, res)=>{
 
-//   console.log("=================================");
-//   console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
-//   console.log("METHOD:", req.method);
-//   console.log("CONTENT TYPE:", req.headers["content-type"]);
+// =====================================================
+// 2. SUBSCRIBE APP TO WABA
+// Run this once after webhook configuration
+// =====================================================
 
-//   console.log(
-//     "BODY:",
-//     JSON.stringify(req.body, null, 2)
-//   );
-
-//   console.log("=================================");
-
-//   return res.sendStatus(200);
-// })
-// ++++++++++++++++++++
-//  WORKING ***********
-
-// ================================
-// SEND WHATSAPP MESSAGE
-// ================================
-
-async function sendWhatsAppMessage(to, message) {
+async function subscribeAppToWABA() {
   try {
-    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    if (!WABA_ID) {
+      throw new Error(
+        "WHATSAPP_BUSINESS_ACCOUNT_ID is missing"
+      );
+    }
 
-    const token = process.env.WHATSAPP_ACCESS_TOKEN;
+    if (!ACCESS_TOKEN) {
+      throw new Error(
+        "WHATSAPP_ACCESS_TOKEN is missing"
+      );
+    }
 
-    const url = `https://graph.facebook.com/v24.0/${phoneNumberId}/messages`;
+    const url =
+      `https://graph.facebook.com/${GRAPH_API_VERSION}` +
+      `/${WABA_ID}/subscribed_apps`;
 
-    console.log("📤 Sending WhatsApp message...");
-    console.log("TO:", to);
+    console.log("====================================");
+    console.log("🔔 SUBSCRIBING APP TO WABA");
+    console.log("WABA ID:", WABA_ID);
+    console.log("====================================");
 
     const response = await fetch(url, {
       method: "POST",
 
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    console.log(
+      "WABA SUBSCRIBE RESPONSE:",
+      JSON.stringify(data, null, 2)
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error?.message ||
+          "WABA subscription failed"
+      );
+    }
+
+    console.log("✅ WABA SUBSCRIBED SUCCESSFULLY");
+
+    return data;
+
+  } catch (error) {
+    console.error(
+      "❌ WABA SUBSCRIPTION ERROR:",
+      error.message
+    );
+
+    throw error;
+  }
+}
+
+
+// =====================================================
+// 3. CHECK WABA SUBSCRIPTION
+// =====================================================
+
+async function getWabaSubscriptions() {
+  try {
+    const url =
+      `https://graph.facebook.com/${GRAPH_API_VERSION}` +
+      `/${WABA_ID}/subscribed_apps`;
+
+    const response = await fetch(url, {
+      method: "GET",
+
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+      },
+    });
+
+    const data = await response.json();
+
+    console.log(
+      "WABA SUBSCRIPTIONS:",
+      JSON.stringify(data, null, 2)
+    );
+
+    return {
+      ok: response.ok,
+      data,
+    };
+
+  } catch (error) {
+    console.error(
+      "❌ GET WABA SUBSCRIPTION ERROR:",
+      error
+    );
+
+    throw error;
+  }
+}
+
+
+// =====================================================
+// OPTIONAL SETUP ENDPOINTS
+// Remove/protect these after setup
+// =====================================================
+
+app.get("/setup/waba-status", async (req, res) => {
+  try {
+    const result =
+      await getWabaSubscriptions();
+
+    return res
+      .status(result.ok ? 200 : 400)
+      .json(result.data);
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+
+app.post("/setup/subscribe-waba", async (req, res) => {
+  try {
+    const data =
+      await subscribeAppToWABA();
+
+    return res.status(200).json({
+      success: true,
+      meta: data,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+
+// =====================================================
+// 4. SEND WHATSAPP MESSAGE
+// =====================================================
+
+async function sendWhatsAppMessage(to, message) {
+  try {
+    if (!PHONE_NUMBER_ID) {
+      throw new Error(
+        "WHATSAPP_PHONE_NUMBER_ID missing"
+      );
+    }
+
+    if (!ACCESS_TOKEN) {
+      throw new Error(
+        "WHATSAPP_ACCESS_TOKEN missing"
+      );
+    }
+
+    const url =
+      `https://graph.facebook.com/${GRAPH_API_VERSION}` +
+      `/${PHONE_NUMBER_ID}/messages`;
+
+    console.log("------------------------------------");
+    console.log("📤 SENDING WHATSAPP MESSAGE");
+    console.log("TO:", to);
+    console.log("------------------------------------");
+
+    const response = await fetch(url, {
+      method: "POST",
+
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
         "Content-Type": "application/json",
       },
 
@@ -154,159 +296,69 @@ async function sendWhatsAppMessage(to, message) {
 
     const data = await response.json();
 
-    console.log("META RESPONSE:", JSON.stringify(data, null, 2));
+    console.log(
+      "META SEND RESPONSE:",
+      JSON.stringify(data, null, 2)
+    );
 
     if (!response.ok) {
-      console.error("❌ MESSAGE SEND FAILED");
+      console.error(
+        "❌ MESSAGE SEND FAILED"
+      );
 
-      return;
+      return {
+        success: false,
+        data,
+      };
     }
 
-    console.log("✅ MESSAGE SENT SUCCESSFULLY");
+    console.log(
+      "✅ MESSAGE SENT SUCCESSFULLY"
+    );
+
+    return {
+      success: true,
+      data,
+    };
+
   } catch (error) {
-    console.error("❌ SEND MESSAGE ERROR:", error);
+    console.error(
+      "❌ SEND WHATSAPP ERROR:",
+      error
+    );
+
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 }
-// ================================
-// RECEIVE WHATSAPP MESSAGE
-// ================================
 
-app.post("/webhook", async (req, res) => {
-  console.log("=================================");
-  console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
-  console.log("METHOD:", req.method);
-  console.log("CONTENT TYPE:", req.headers["content-type"]);
 
-  console.log("BODY:", JSON.stringify(req.body, null, 2));
+// =====================================================
+// 5. PROCESS TEXT MESSAGE
+// =====================================================
 
-  const body = req.body;
+async function processTextMessage({
+  senderPhone,
+  senderName,
+  text,
+}) {
+  console.log("====================================");
+  console.log("👤 NAME:", senderName);
+  console.log("📱 PHONE:", senderPhone);
+  console.log("💬 MESSAGE:", text);
+  console.log("====================================");
 
-  if (body.object !== "whatsapp_business_account") {
-    return;
-  }
 
-  const value = body.entry?.[0]?.changes?.[0]?.value;
+  // =============================================
+  // HI / HII / HIII
+  // =============================================
 
-  const message = value?.messages?.[0];
-
-  if (!message) {
-    return;
-  }
-
-  const senderPhone = message.from;
-
-  const messageType = message.type;
-
-  console.log("Sender:", senderPhone);
-  console.log("Type:", messageType);
-
-  if (messageType === "text") {
-    const text = message.text?.body?.trim() || "";
-
-    console.log("Message############:", text);
-
-    // Hi / Hii / Hiii / Hiiii
-    if (/^hi+$/i.test(text)) {
-      await sendWhatsAppMessage(
-        senderPhone,
-        `Hello 👋
-
-        Welcome to MVDT Connect Assistant.
-
-        Please select an option:
-
-        1️⃣ Daily Work Reporting
-        2️⃣ Site Issue / Delay
-        3️⃣ Material Requirement
-        4️⃣ Work Completion
-        5️⃣ Attendance
-
-        Reply with option number.`,
-      );
-
-      return;
-    }
-
-    // Option 1
-    if (text === "1") {
-      await sendWhatsAppMessage(
-        senderPhone,
-        `📋 Daily Work Reporting
-
-          Please enter your Route / Job ID.`,
-      );
-
-      return;
-    }
-
-    // Option 2
-    if (text === "2") {
-      await sendWhatsAppMessage(
-        senderPhone,
-        `⚠️ Site Issue / Delay
-
-          Please describe your issue.`,
-      );
-
-      return;
-    }
-
-    // Default reply
+  if (/^hi+$/i.test(text)) {
     await sendWhatsAppMessage(
       senderPhone,
-      `Sorry, I didn't understand.
-
-      Please type "Hi" to start.`,
-    );
-  }
-
-  console.log("==================Test complete===============");
-
-  return res.sendStatus(200);
-});
-
-app.post("/test", async (req, res) => {
-  try {
-    // Always acknowledge webhook
-    res.sendStatus(200);
-
-    const body = req.body;
-
-    console.log("Webhook:", JSON.stringify(body, null, 2));
-
-    if (body.object !== "whatsapp_business_account") {
-      return;
-    }
-
-    const value = body.entry?.[0]?.changes?.[0]?.value;
-
-    const message = value?.messages?.[0];
-
-    if (!message) {
-      return;
-    }
-
-    const senderPhone = message.from;
-
-    const messageType = message.type;
-
-    console.log("Sender:", senderPhone);
-    console.log("Type:", messageType);
-
-    // ================================
-    // TEXT MESSAGE
-    // ================================
-
-    if (messageType === "text") {
-      const text = message.text?.body?.trim() || "";
-
-      console.log("Message:", text);
-
-      // Hi / Hii / Hiii / Hiiii
-      if (/^hi+$/i.test(text)) {
-        await sendWhatsAppMessage(
-          senderPhone,
-          `Hello 👋
+      `Hello ${senderName} 👋
 
 Welcome to MVDT Connect Assistant.
 
@@ -318,51 +370,318 @@ Please select an option:
 4️⃣ Work Completion
 5️⃣ Attendance
 
-Reply with option number.`,
-        );
+Reply with option number.`
+    );
 
-        return;
-      }
-
-      // Option 1
-      if (text === "1") {
-        await sendWhatsAppMessage(
-          senderPhone,
-          `📋 Daily Work Reporting
-
-Please enter your Route / Job ID.`,
-        );
-
-        return;
-      }
-
-      // Option 2
-      if (text === "2") {
-        await sendWhatsAppMessage(
-          senderPhone,
-          `⚠️ Site Issue / Delay
-
-Please describe your issue.`,
-        );
-
-        return;
-      }
-
-      // Default reply
-      await sendWhatsAppMessage(
-        senderPhone,
-        `Sorry, I didn't understand.
-
-Please type "Hi" to start.`,
-      );
-    }
-  } catch (error) {
-    console.error("Webhook processing error:", error);
+    return;
   }
+
+
+  // =============================================
+  // OPTION 1
+  // =============================================
+
+  if (text === "1") {
+    await sendWhatsAppMessage(
+      senderPhone,
+      `📋 Daily Work Reporting
+
+Please enter your Route / Job ID.`
+    );
+
+    return;
+  }
+
+
+  // =============================================
+  // OPTION 2
+  // =============================================
+
+  if (text === "2") {
+    await sendWhatsAppMessage(
+      senderPhone,
+      `⚠️ Site Issue / Delay
+
+Please describe your issue.`
+    );
+
+    return;
+  }
+
+
+  // =============================================
+  // OPTION 3
+  // =============================================
+
+  if (text === "3") {
+    await sendWhatsAppMessage(
+      senderPhone,
+      `📦 Material Requirement
+
+Please enter your Route / Job ID.`
+    );
+
+    return;
+  }
+
+
+  // =============================================
+  // OPTION 4
+  // =============================================
+
+  if (text === "4") {
+    await sendWhatsAppMessage(
+      senderPhone,
+      `✅ Work Completion
+
+Please enter your Route / Job ID.`
+    );
+
+    return;
+  }
+
+
+  // =============================================
+  // OPTION 5
+  // =============================================
+
+  if (text === "5") {
+    await sendWhatsAppMessage(
+      senderPhone,
+      `🕐 Attendance
+
+Please enter your Employee ID.`
+    );
+
+    return;
+  }
+
+
+  // =============================================
+  // DEFAULT
+  // =============================================
+
+  await sendWhatsAppMessage(
+    senderPhone,
+    `Sorry ${senderName}, I didn't understand that.
+
+Please type "Hi" to start.`
+  );
+}
+
+
+// =====================================================
+// 6. PROCESS META WEBHOOK
+// =====================================================
+
+async function processWhatsAppWebhook(body) {
+  try {
+    if (
+      body.object !==
+      "whatsapp_business_account"
+    ) {
+      console.log(
+        "ℹ️ Ignoring non-WhatsApp webhook"
+      );
+
+      return;
+    }
+
+    const entries = body.entry || [];
+
+    for (const entry of entries) {
+
+      const changes = entry.changes || [];
+
+      for (const change of changes) {
+
+        if (change.field !== "messages") {
+          continue;
+        }
+
+        const value = change.value;
+
+        if (!value) {
+          continue;
+        }
+
+
+        // ==========================================
+        // MESSAGE STATUS EVENTS
+        // ==========================================
+
+        if (value.statuses?.length) {
+
+          for (const status of value.statuses) {
+            console.log(
+              "📊 MESSAGE STATUS:",
+              status.status
+            );
+
+            console.log(
+              "MESSAGE ID:",
+              status.id
+            );
+          }
+
+          continue;
+        }
+
+
+        // ==========================================
+        // INCOMING USER MESSAGES
+        // ==========================================
+
+        const messages =
+          value.messages || [];
+
+        for (const message of messages) {
+
+          const senderPhone =
+            message.from;
+
+          const contact =
+            value.contacts?.find(
+              (item) =>
+                item.wa_id === senderPhone
+            ) || value.contacts?.[0];
+
+          const senderName =
+            contact?.profile?.name ||
+            "User";
+
+          console.log(
+            "📨 MESSAGE TYPE:",
+            message.type
+          );
+
+
+          // ======================================
+          // TEXT
+          // ======================================
+
+          if (message.type === "text") {
+
+            const text =
+              message.text?.body?.trim() ||
+              "";
+
+            await processTextMessage({
+              senderPhone,
+              senderName,
+              text,
+            });
+
+            continue;
+          }
+
+
+          // ======================================
+          // UNSUPPORTED MESSAGE TYPE
+          // ======================================
+
+          console.log(
+            "Unsupported message type:",
+            message.type
+          );
+
+          await sendWhatsAppMessage(
+            senderPhone,
+            `Currently I can process text messages only.
+
+Please type "Hi" to start.`
+          );
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error(
+      "❌ WEBHOOK PROCESSING ERROR:",
+      error
+    );
+  }
+}
+
+
+// =====================================================
+// 7. RECEIVE REAL META WEBHOOK
+// =====================================================
+
+app.post("/webhook", (req, res) => {
+
+  console.log("\n\n====================================");
+  console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
+  console.log("====================================");
+
+  console.log(
+    JSON.stringify(req.body, null, 2)
+  );
+
+
+  /*
+   * VERY IMPORTANT
+   *
+   * Give Meta 200 immediately.
+   *
+   * Do not wait for Graph API,
+   * MongoDB, chatbot logic, etc.
+   */
+
+  res.sendStatus(200);
+
+
+  /*
+   * Continue processing after
+   * acknowledging Meta.
+   */
+
+  processWhatsAppWebhook(req.body)
+    .catch((error) => {
+      console.error(
+        "Webhook async error:",
+        error
+      );
+    });
 });
 
-const PORT = process.env.PORT || 5000;
+
+// =====================================================
+// 8. JSON ERROR HANDLER
+// =====================================================
+
+app.use((err, req, res, next) => {
+
+  console.error("❌ EXPRESS ERROR:", err);
+
+  if (
+    err instanceof SyntaxError &&
+    err.status === 400
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid JSON body",
+      error: err.message,
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+});
+
+
+// =====================================================
+// SERVER
+// =====================================================
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(
+    `🚀 Server running on port ${PORT}`
+  );
+
+  console.log(
+    `Webhook: /webhook`
+  );
 });
