@@ -189,65 +189,65 @@ app.post("/webhook", async (req, res) => {
   console.log("Sender:", senderPhone);
   console.log("Type:", messageType);
 
-//   if (messageType === "text") {
-//     const text = message.text?.body?.trim() || "";
+  if (messageType === "text") {
+    const text = message.text?.body?.trim() || "";
 
-//     console.log("Message:", text);
+    console.log("Message:", text);
 
-//     // Hi / Hii / Hiii / Hiiii
-//     if (/^hi+$/i.test(text)) {
-//       await sendWhatsAppMessage(
-//         senderPhone,
-//         `Hello 👋
+    // Hi / Hii / Hiii / Hiiii
+    if (/^hi+$/i.test(text)) {
+      await sendWhatsAppMessage(
+        senderPhone,
+        `Hello 👋
 
-// Welcome to MVDT Connect Assistant.
+Welcome to MVDT Connect Assistant.
 
-// Please select an option:
+Please select an option:
 
-// 1️⃣ Daily Work Reporting
-// 2️⃣ Site Issue / Delay
-// 3️⃣ Material Requirement
-// 4️⃣ Work Completion
-// 5️⃣ Attendance
+1️⃣ Daily Work Reporting
+2️⃣ Site Issue / Delay
+3️⃣ Material Requirement
+4️⃣ Work Completion
+5️⃣ Attendance
 
-// Reply with option number.`,
-//       );
+Reply with option number.`,
+      );
 
-//       return;
-//     }
+      return;
+    }
 
-//     // Option 1
-//     if (text === "1") {
-//       await sendWhatsAppMessage(
-//         senderPhone,
-//         `📋 Daily Work Reporting
+    // Option 1
+    if (text === "1") {
+      await sendWhatsAppMessage(
+        senderPhone,
+        `📋 Daily Work Reporting
 
-// Please enter your Route / Job ID.`,
-//       );
+Please enter your Route / Job ID.`,
+      );
 
-//       return;
-//     }
+      return;
+    }
 
-//     // Option 2
-//     if (text === "2") {
-//       await sendWhatsAppMessage(
-//         senderPhone,
-//         `⚠️ Site Issue / Delay
+    // Option 2
+    if (text === "2") {
+      await sendWhatsAppMessage(
+        senderPhone,
+        `⚠️ Site Issue / Delay
 
-// Please describe your issue.`,
-//       );
+Please describe your issue.`,
+      );
 
-//       return;
-//     }
+      return;
+    }
 
-//     // Default reply
-//     await sendWhatsAppMessage(
-//       senderPhone,
-//       `Sorry, I didn't understand.
+    // Default reply
+    await sendWhatsAppMessage(
+      senderPhone,
+      `Sorry, I didn't understand.
 
-// Please type "Hi" to start.`,
-//     );
-//   }
+Please type "Hi" to start.`,
+    );
+  }
 
   console.log("==================Test complete===============");
 
