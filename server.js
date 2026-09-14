@@ -92,6 +92,11 @@ app.get("/webhook", (req, res) => {
   return res.sendStatus(403);
 });
 
+
+app.post("/webhook", (req, res)=>{
+  console.log(JSON.stringify( req.body, null, 2))
+  res.status(200).send("webhook processed...")
+})
 // ================================
 // SEND WHATSAPP MESSAGE
 // ================================
