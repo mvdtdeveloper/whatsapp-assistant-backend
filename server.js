@@ -120,14 +120,11 @@ app.get("/webhook", (req, res) => {
 
 async function sendWhatsAppMessage(to, message) {
   try {
-    const phoneNumberId =
-      process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
-    const token =
-      process.env.WHATSAPP_ACCESS_TOKEN;
+    const token = process.env.WHATSAPP_ACCESS_TOKEN;
 
-    const url =
-      `https://graph.facebook.com/v24.0/${phoneNumberId}/messages`;
+    const url = `https://graph.facebook.com/v24.0/${phoneNumberId}/messages`;
 
     console.log("📤 Sending WhatsApp message...");
     console.log("TO:", to);
@@ -157,28 +154,17 @@ async function sendWhatsAppMessage(to, message) {
 
     const data = await response.json();
 
-    console.log(
-      "META RESPONSE:",
-      JSON.stringify(data, null, 2)
-    );
+    console.log("META RESPONSE:", JSON.stringify(data, null, 2));
 
     if (!response.ok) {
-      console.error(
-        "❌ MESSAGE SEND FAILED"
-      );
+      console.error("❌ MESSAGE SEND FAILED");
 
       return;
     }
 
-    console.log(
-      "✅ MESSAGE SENT SUCCESSFULLY"
-    );
-
+    console.log("✅ MESSAGE SENT SUCCESSFULLY");
   } catch (error) {
-    console.error(
-      "❌ SEND MESSAGE ERROR:",
-      error
-    );
+    console.error("❌ SEND MESSAGE ERROR:", error);
   }
 }
 // ================================
@@ -217,7 +203,7 @@ app.post("/webhook", async (req, res) => {
   if (messageType === "text") {
     const text = message.text?.body?.trim() || "";
 
-    console.log("Message:", text);
+    console.log("Message############:", text);
 
     // Hi / Hii / Hiii / Hiiii
     if (/^hi+$/i.test(text)) {
@@ -225,17 +211,17 @@ app.post("/webhook", async (req, res) => {
         senderPhone,
         `Hello 👋
 
-Welcome to MVDT Connect Assistant.
+        Welcome to MVDT Connect Assistant.
 
-Please select an option:
+        Please select an option:
 
-1️⃣ Daily Work Reporting
-2️⃣ Site Issue / Delay
-3️⃣ Material Requirement
-4️⃣ Work Completion
-5️⃣ Attendance
+        1️⃣ Daily Work Reporting
+        2️⃣ Site Issue / Delay
+        3️⃣ Material Requirement
+        4️⃣ Work Completion
+        5️⃣ Attendance
 
-Reply with option number.`,
+        Reply with option number.`,
       );
 
       return;
@@ -247,7 +233,7 @@ Reply with option number.`,
         senderPhone,
         `📋 Daily Work Reporting
 
-Please enter your Route / Job ID.`,
+          Please enter your Route / Job ID.`,
       );
 
       return;
@@ -259,7 +245,7 @@ Please enter your Route / Job ID.`,
         senderPhone,
         `⚠️ Site Issue / Delay
 
-Please describe your issue.`,
+          Please describe your issue.`,
       );
 
       return;
@@ -270,7 +256,7 @@ Please describe your issue.`,
       senderPhone,
       `Sorry, I didn't understand.
 
-Please type "Hi" to start.`,
+      Please type "Hi" to start.`,
     );
   }
 
