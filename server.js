@@ -95,9 +95,19 @@ app.get("/webhook", (req, res) => {
 
 app.post("/webhook", (req, res)=>{
 
-  console.log("run...........................")
-  console.log(JSON.stringify( req.body, null, 2))
-  res.status(200).send("webhook processed...")
+  console.log("=================================");
+  console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
+  console.log("METHOD:", req.method);
+  console.log("CONTENT TYPE:", req.headers["content-type"]);
+
+  console.log(
+    "BODY:",
+    JSON.stringify(req.body, null, 2)
+  );
+
+  console.log("=================================");
+
+  return res.sendStatus(200);
 })
 // ================================
 // SEND WHATSAPP MESSAGE
