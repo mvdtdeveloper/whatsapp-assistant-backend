@@ -93,111 +93,110 @@ app.get("/webhook", (req, res) => {
   return res.sendStatus(403);
 });
 
+//  WORKING ***********
+// +++++++++++++++++++++++++
+// app.post("/webhook", (req, res)=>{
 
-app.post("/webhook", (req, res)=>{
+//   console.log("=================================");
+//   console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
+//   console.log("METHOD:", req.method);
+//   console.log("CONTENT TYPE:", req.headers["content-type"]);
 
-  console.log("=================================");
-  console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
-  console.log("METHOD:", req.method);
-  console.log("CONTENT TYPE:", req.headers["content-type"]);
+//   console.log(
+//     "BODY:",
+//     JSON.stringify(req.body, null, 2)
+//   );
 
-  console.log(
-    "BODY:",
-    JSON.stringify(req.body, null, 2)
-  );
+//   console.log("=================================");
 
-  console.log("=================================");
+//   return res.sendStatus(200);
+// })
+// ++++++++++++++++++++
+//  WORKING ***********
 
-  return res.sendStatus(200);
-})
 // ================================
 // SEND WHATSAPP MESSAGE
 // ================================
 
-// async function sendWhatsAppMessage(to, message) {
-//   console.log(process.env.WHATSAPP_PHONE_NUMBER_ID);
-//   try {
-//     const url =
-//       `https://graph.facebook.com/v24.0/` +
-//       `${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
+async function sendWhatsAppMessage(to, message) {
+  console.log(process.env.WHATSAPP_PHONE_NUMBER_ID);
+  try {
+    const url =
+      `https://graph.facebook.com/v24.0/` +
+      `${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`;
 
-//     const response = await fetch(url, {
-//       method: "POST",
+    const response = await fetch(url, {
+      method: "POST",
 
-//       headers: {
-//         Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
-//         "Content-Type": "application/json",
-//       },
+      headers: {
+        Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+        "Content-Type": "application/json",
+      },
 
-//       body: JSON.stringify({
-//         messaging_product: "whatsapp",
-//         recipient_type: "individual",
-//         to,
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to,
 
-//         type: "text",
+        type: "text",
 
-//         text: {
-//           body: message,
-//         },
-//       }),
-//     });
+        text: {
+          body: message,
+        },
+      }),
+    });
 
-//     const data = await response.json();
+    const data = await response.json();
 
-//     console.log("WhatsApp API response:", data);
+    console.log("WhatsApp API response:", data);
 
-//     return data;
-//   } catch (error) {
-//     console.error("Send WhatsApp error:", error);
-//   }
-// }
+    return data;
+  } catch (error) {
+    console.error("Send WhatsApp error:", error);
+  }
+}
 
 // ================================
 // RECEIVE WHATSAPP MESSAGE
 // ================================
 
-// app.post("/webhook", async (req, res) => {
-//   try {
-//     // Always acknowledge webhook
-//     res.sendStatus(200);
+app.post("/webhook", async (req, res) => {
+  console.log("=================================");
+  console.log("🔥 WHATSAPP POST WEBHOOK RECEIVED");
+  console.log("METHOD:", req.method);
+  console.log("CONTENT TYPE:", req.headers["content-type"]);
 
-//     const body = req.body;
+  console.log("BODY:", JSON.stringify(req.body, null, 2));
 
-//     console.log("Webhook:", JSON.stringify(body, null, 2));
+  if (body.object !== "whatsapp_business_account") {
+    return;
+  }
 
-//     if (body.object !== "whatsapp_business_account") {
-//       return;
-//     }
+  const value = body.entry?.[0]?.changes?.[0]?.value;
 
-//     const value = body.entry?.[0]?.changes?.[0]?.value;
+  const message = value?.messages?.[0];
 
-//     const message = value?.messages?.[0];
+  if (!message) {
+    return;
+  }
 
-//     if (!message) {
-//       return;
-//     }
+  const senderPhone = message.from;
 
-//     const senderPhone = message.from;
+  const messageType = message.type;
 
-//     const messageType = message.type;
+  console.log("Sender:", senderPhone);
+  console.log("Type:", messageType);
 
-//     console.log("Sender:", senderPhone);
-//     console.log("Type:", messageType);
+//   if (messageType === "text") {
+//     const text = message.text?.body?.trim() || "";
 
-//     // ================================
-//     // TEXT MESSAGE
-//     // ================================
+//     console.log("Message:", text);
 
-//     if (messageType === "text") {
-//       const text = message.text?.body?.trim() || "";
-
-//       console.log("Message:", text);
-
-//       // Hi / Hii / Hiii / Hiiii
-//       if (/^hi+$/i.test(text)) {
-//         await sendWhatsAppMessage(
-//           senderPhone,
-//           `Hello 👋
+//     // Hi / Hii / Hiii / Hiiii
+//     if (/^hi+$/i.test(text)) {
+//       await sendWhatsAppMessage(
+//         senderPhone,
+//         `Hello 👋
 
 // Welcome to MVDT Connect Assistant.
 
@@ -210,47 +209,144 @@ app.post("/webhook", (req, res)=>{
 // 5️⃣ Attendance
 
 // Reply with option number.`,
-//         );
+//       );
 
-//         return;
-//       }
+//       return;
+//     }
 
-//       // Option 1
-//       if (text === "1") {
-//         await sendWhatsAppMessage(
-//           senderPhone,
-//           `📋 Daily Work Reporting
-
-// Please enter your Route / Job ID.`,
-//         );
-
-//         return;
-//       }
-
-//       // Option 2
-//       if (text === "2") {
-//         await sendWhatsAppMessage(
-//           senderPhone,
-//           `⚠️ Site Issue / Delay
-
-// Please describe your issue.`,
-//         );
-
-//         return;
-//       }
-
-//       // Default reply
+//     // Option 1
+//     if (text === "1") {
 //       await sendWhatsAppMessage(
 //         senderPhone,
-//         `Sorry, I didn't understand.
+//         `📋 Daily Work Reporting
+
+// Please enter your Route / Job ID.`,
+//       );
+
+//       return;
+//     }
+
+//     // Option 2
+//     if (text === "2") {
+//       await sendWhatsAppMessage(
+//         senderPhone,
+//         `⚠️ Site Issue / Delay
+
+// Please describe your issue.`,
+//       );
+
+//       return;
+//     }
+
+//     // Default reply
+//     await sendWhatsAppMessage(
+//       senderPhone,
+//       `Sorry, I didn't understand.
 
 // Please type "Hi" to start.`,
-//       );
-//     }
-//   } catch (error) {
-//     console.error("Webhook processing error:", error);
+//     );
 //   }
-// });
+
+  console.log("==================Test complete===============");
+
+  return res.sendStatus(200);
+});
+
+app.post("/test", async (req, res) => {
+  try {
+    // Always acknowledge webhook
+    res.sendStatus(200);
+
+    const body = req.body;
+
+    console.log("Webhook:", JSON.stringify(body, null, 2));
+
+    if (body.object !== "whatsapp_business_account") {
+      return;
+    }
+
+    const value = body.entry?.[0]?.changes?.[0]?.value;
+
+    const message = value?.messages?.[0];
+
+    if (!message) {
+      return;
+    }
+
+    const senderPhone = message.from;
+
+    const messageType = message.type;
+
+    console.log("Sender:", senderPhone);
+    console.log("Type:", messageType);
+
+    // ================================
+    // TEXT MESSAGE
+    // ================================
+
+    if (messageType === "text") {
+      const text = message.text?.body?.trim() || "";
+
+      console.log("Message:", text);
+
+      // Hi / Hii / Hiii / Hiiii
+      if (/^hi+$/i.test(text)) {
+        await sendWhatsAppMessage(
+          senderPhone,
+          `Hello 👋
+
+Welcome to MVDT Connect Assistant.
+
+Please select an option:
+
+1️⃣ Daily Work Reporting
+2️⃣ Site Issue / Delay
+3️⃣ Material Requirement
+4️⃣ Work Completion
+5️⃣ Attendance
+
+Reply with option number.`,
+        );
+
+        return;
+      }
+
+      // Option 1
+      if (text === "1") {
+        await sendWhatsAppMessage(
+          senderPhone,
+          `📋 Daily Work Reporting
+
+Please enter your Route / Job ID.`,
+        );
+
+        return;
+      }
+
+      // Option 2
+      if (text === "2") {
+        await sendWhatsAppMessage(
+          senderPhone,
+          `⚠️ Site Issue / Delay
+
+Please describe your issue.`,
+        );
+
+        return;
+      }
+
+      // Default reply
+      await sendWhatsAppMessage(
+        senderPhone,
+        `Sorry, I didn't understand.
+
+Please type "Hi" to start.`,
+      );
+    }
+  } catch (error) {
+    console.error("Webhook processing error:", error);
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 
