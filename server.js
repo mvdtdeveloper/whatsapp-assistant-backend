@@ -30,9 +30,9 @@ app.get("/", (req, res) => {
 
 // ================================
 // WEBHOOK VERIFY
-// ================================
+// ===============================
 
-router.get("/webhook", (req, res) => {
+app.get("/webhook", (req, res) => {
   console.log("========== META WEBHOOK VERIFY ==========");
 
   console.log("req.query:", req.query);
