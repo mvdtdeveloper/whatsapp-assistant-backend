@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const { verifyWebhook, receiveWebhook } = require("../controllers/webhookController");
+// const express = require("express");
+// const router = express.Router();
+// const { verifyWebhook, receiveWebhook } = require("../controllers/webhookController");
 
-router.get("/", verifyWebhook);
-router.post("/", receiveWebhook);
+// router.get("/", verifyWebhook);
+// router.post("/", receiveWebhook);
 
-module.exports = router;
+// module.exports = router;
