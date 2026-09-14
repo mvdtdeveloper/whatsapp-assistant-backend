@@ -168,6 +168,8 @@ app.post("/webhook", async (req, res) => {
 
   console.log("BODY:", JSON.stringify(req.body, null, 2));
 
+  const body = req.body;
+
   if (body.object !== "whatsapp_business_account") {
     return;
   }
