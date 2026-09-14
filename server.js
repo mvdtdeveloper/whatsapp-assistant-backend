@@ -60,7 +60,7 @@ app.get("/", (req, res) => {
 //   return res.sendStatus(403);
 // });
 
-router.get("/webhook", (req, res) => {
+app.get("/webhook", (req, res) => {
   console.log("\n\n====================================");
   console.log("🔥🔥 META GET WEBHOOK HIT 🔥🔥");
   console.log("TIME:", new Date().toISOString());
@@ -81,10 +81,7 @@ router.get("/webhook", (req, res) => {
 
   console.log("====================================\n\n");
 
-  if (
-    mode === "subscribe" &&
-    token === process.env.WHATSAPP_VERIFY_TOKEN
-  ) {
+  if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN) {
     console.log("✅ META WEBHOOK VERIFIED");
 
     return res.status(200).send(challenge);
