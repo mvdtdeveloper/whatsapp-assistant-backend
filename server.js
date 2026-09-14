@@ -124,7 +124,7 @@ async function sendWhatsAppMessage(to, message) {
       process.env.WHATSAPP_PHONE_NUMBER_ID;
 
     const token =
-      process.env.WHATSAPP_TOKEN;
+      process.env.WHATSAPP_ACCESS_TOKEN;
 
     const url =
       `https://graph.facebook.com/v24.0/${phoneNumberId}/messages`;
