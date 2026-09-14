@@ -33,8 +33,8 @@ app.get("/", (req, res) => {
 // ================================
 
 app.get("/webhook", (req, res) => {
-
-  console.log("run")
+  console.log("run");
+  console.log(req);
   console.log(req.query);
 
   res.send();
